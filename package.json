@@ -1,0 +1,21 @@
+{
+  "name": "wickedchkn-platform",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Direct ordering platform (clone of Wicked Chkn) — rebrand for a second restaurant. Customer PWA + admin dashboard + shared backend.",
+  "workspaces": [
+    "server",
+    "customer",
+    "admin"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,customer,admin -c blue,green,magenta \"npm run dev -w server\" \"npm run dev -w customer\" \"npm run dev -w admin\"",
+    "dev:server": "npm run dev -w server",
+    "dev:customer": "npm run dev -w customer",
+    "dev:admin": "npm run dev -w admin",
+    "build": "npm run build -w customer && npm run build -w admin"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,19 @@
+# Render blueprint — deploys the whole platform as ONE service:
+# backend API + customer app at /  + admin dashboard at /admin
+services:
+  - type: web
+    name: wickedchkn
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node server/src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+      # add secrets in the Render dashboard (never commit them):
+      #   ANTHROPIC_API_KEY / OPENAI_API_KEY  → real AI chat
+      #   TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM → real SMS
+      #   RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET → real payments
+      #   ENFORCE_HOURS=1 → enforce the 11:00–22:00 ordering window
+      #   DATABASE_URL → switch from SQLite to PostgreSQL
