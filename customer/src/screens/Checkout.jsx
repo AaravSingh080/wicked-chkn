@@ -6,7 +6,7 @@ import { sfx } from '../sound.js';
 
 export default function Checkout() {
   const {
-    setScreen, cartLines, orderType, total, promo, config, auth, setShowLogin,
+    setScreen, cartLines, orderType, total, subtotal, discount, deliveryFee, promo, config, auth, setShowLogin,
     clearCart, setPromo, setActiveOrder, refreshOrders, notify, showToast, setPaySheet, sessionId
   } = useStore();
 
@@ -32,6 +32,14 @@ export default function Checkout() {
   const [saveLabel, setSaveLabel] = useState(''); // 'Home' | 'Work' | '' = don't save
   const [addrSugs, setAddrSugs] = useState([]);
   const pickedRef = useRef('');
+  // the mod corner — whole-order instructions for the kitchen
+  const [kitchenChips, setKitchenChips] = useState([]);
+  const [kitchenText, setKitchenText] = useState('');
+  const kitchenNote = [...kitchenChips, kitchenText.trim()].filter(Boolean).join(' · ');
+  const toggleKitchenChip = (c) => {
+    buzz(HAPTIC.toggle);
+    setKitchenChips((cur) => (cur.includes(c) ? cur.filter((x) => x !== c) : [...cur, c]));
+  };
 
   // address autocomplete via Photon (OpenStreetMap) — free, keyless, Ludhiana-biased
   useEffect(() => {
@@ -95,6 +103,7 @@ export default function Checkout() {
       phone: phone.replace(/\D/g, ''),
       address,
       tableNo,
+      kitchenNote: kitchenNote || undefined,
       promo,
       payment
     });
@@ -154,42 +163,76 @@ export default function Checkout() {
   };
 
   return (
-    <div className="px-5 pb-40">
-      <header className="flex items-center gap-2 pt-5 mb-4">
-        <button className="w-9 h-9 rounded-md bg-card border-2 border-line flex items-center justify-center" onClick={() => setScreen('cart')} aria-label="Back">
-          <ChevronLeft size={18} />
-        </button>
-        <h1 className="font-display font-extrabold text-[22px] tracking-[-0.5px] flex-1">Checkout</h1>
-        <span className="rounded-full bg-bluesoft text-blue px-3 py-1.5 text-[11.5px] font-extrabold">{etaLabel}</span>
-      </header>
-
-      {!auth && (
-        <button
-          className="w-full rounded-lg bg-bluesoft border-2 border-blue/30 p-3.5 text-left text-[13px] font-bold text-blue mb-4"
-          onClick={() => setShowLogin(true)}
-        >
-          Sign in to prefill your details &amp; save this order →
-        </button>
-      )}
-
-      {/* contact */}
-      <Section title="Contact">
-        <input className={inputCls} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input
-          className={inputCls}
-          placeholder="10-digit phone"
-          inputMode="numeric"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value.replace(/[^\d]/g, '').slice(0, 10))}
+    <div className="pb-44">
+      {/* maroon masthead */}
+      <div className="relative overflow-hidden text-white px-5 pt-5 pb-12" style={{ background: 'var(--hero)' }}>
+        <span
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'repeating-linear-gradient(-45deg, rgba(255,255,255,.03) 0 16px, transparent 16px 32px)' }}
         />
-      </Section>
+        <div className="relative flex items-center gap-3">
+          <button
+            className="w-9 h-9 rounded-md flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(255,255,255,.1)', border: '2px solid rgba(255,255,255,.2)' }}
+            onClick={() => setScreen('cart')}
+            aria-label="Back"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <div className="flex-1">
+            <h1 className="font-display uppercase text-[22px] leading-none">The Order Ticket</h1>
+            <div className="text-[11px] font-bold mt-1" style={{ color: '#E8B8B0' }}>
+              {etaLabel}
+            </div>
+          </div>
+          <span
+            className="rotate-6 rounded-md px-2 py-1 font-display text-[10px] tracking-[1.5px] shrink-0"
+            style={{ background: '#FFF3EC', color: '#4A0E0B', border: '2px solid #4A0E0B' }}
+          >
+            FRESH
+          </span>
+        </div>
+      </div>
 
-      {orderType === 'delivery' && (
-        <Section title="Delivery">
+      {/* the ticket itself */}
+      <div className="relative z-10 px-5 -mt-6">
+        <div className="bg-card rounded-t-lg overflow-hidden" style={{ border: '2px solid var(--tileBorder)', borderBottom: 'none', boxShadow: '5px 5px 0 var(--shadowInk)' }}>
+          {/* red stub band */}
+          <div className="bg-blue text-white px-4 py-2 flex items-center justify-between font-display text-[10.5px] tracking-[1.5px] uppercase">
+            <span>Wicked Chkn · BRS Nagar</span>
+            <span>{new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+          </div>
+
+          <div className="p-4 space-y-5">
+            {!auth && (
+              <button
+                className="w-full rounded-md bg-bluesoft border-2 border-blue/40 p-3 text-left text-[12.5px] font-extrabold text-blue"
+                onClick={() => setShowLogin(true)}
+              >
+                Sign in to prefill your details &amp; save this order →
+              </button>
+            )}
+
+            {/* 01 · contact */}
+            <TicketSection no="01" title="Who's eating">
+              <input className={inputCls} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+              <input
+                className={inputCls}
+                placeholder="10-digit phone"
+                inputMode="numeric"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/[^\d]/g, '').slice(0, 10))}
+              />
+            </TicketSection>
+
+            {orderType === 'delivery' && (
+              <TicketSection no="02" title="Where to">
           <div className="rounded-lg bg-soft p-4 text-center" style={{ border: '2px dashed var(--line)' }}>
             <MapPin size={22} className="text-blue mx-auto" />
             <div className="text-[12.5px] font-bold mt-1.5">Pin dropped · 2.1 km from Wicked Chkn</div>
-            <div className="text-[11.5px] font-bold text-greendark mt-0.5">✓ Within the 7 km delivery zone</div>
+            <div className="text-[11.5px] font-bold text-greendark mt-0.5 flex items-center justify-center gap-1">
+              <Check size={12} strokeWidth={3.5} /> Within the 7 km delivery zone
+            </div>
           </div>
           {savedAddresses.length > 0 && (
             <div className="flex gap-2 flex-wrap">
@@ -245,48 +288,125 @@ export default function Checkout() {
               ))}
             </div>
           )}
-        </Section>
-      )}
+              </TicketSection>
+            )}
 
-      {orderType === 'dinein' && (
-        <Section title="Dine-in">
-          <input className={inputCls} placeholder="Table number" value={tableNo} onChange={(e) => setTableNo(e.target.value.slice(0, 6))} />
-        </Section>
-      )}
+            {orderType === 'dinein' && (
+              <TicketSection no="02" title="Where to">
+                <input className={inputCls} placeholder="Table number" value={tableNo} onChange={(e) => setTableNo(e.target.value.slice(0, 6))} />
+              </TicketSection>
+            )}
 
-      {orderType === 'pickup' && (
-        <Section title="Pickup">
-          <div className="rounded-lg bg-soft p-4 flex items-center gap-3">
-            <Store size={20} className="text-blue shrink-0" />
-            <div>
-              <div className="text-[12.5px] font-bold">Wicked Chkn, Down Town Market, BRS Nagar, Ludhiana</div>
-              <div className="text-[11.5px] text-sub">Ready in 25–30 min after confirmation</div>
-            </div>
+            {orderType === 'pickup' && (
+              <TicketSection no="02" title="Where to">
+                <div className="rounded-lg bg-soft p-4 flex items-center gap-3">
+                  <Store size={20} className="text-blue shrink-0" />
+                  <div>
+                    <div className="text-[12.5px] font-bold">Wicked Chkn, Down Town Market, BRS Nagar, Ludhiana</div>
+                    <div className="text-[11.5px] text-sub">Ready in 25–30 min after confirmation</div>
+                  </div>
+                </div>
+              </TicketSection>
+            )}
+
+            {/* 03 · the mod corner — whole-order kitchen instructions */}
+            <TicketSection no="03" title="The mod corner">
+              <div className="flex gap-1.5 flex-wrap">
+                {['Extra spicy', 'Less spicy', 'No onions', 'Extra sauce', 'No cutlery'].map((c) => {
+                  const on = kitchenChips.includes(c);
+                  return (
+                    <button
+                      key={c}
+                      className={`rounded-md px-3 py-1.5 text-[12px] font-extrabold border-2 ${
+                        on ? 'border-blue text-white bg-blue -rotate-1' : 'border-line bg-bg text-sub'
+                      }`}
+                      onClick={() => toggleKitchenChip(c)}
+                    >
+                      {c}
+                    </button>
+                  );
+                })}
+              </div>
+              <textarea
+                className="w-full bg-bg border-2 border-line rounded-md px-3.5 py-2.5 text-[13px] font-semibold outline-none placeholder:text-sub resize-none"
+                rows={2}
+                maxLength={140}
+                placeholder="Tell the kitchen anything — allergies, how wicked you want it…"
+                value={kitchenText}
+                onChange={(e) => setKitchenText(e.target.value)}
+              />
+              {kitchenNote && (
+                <div className="text-[11px] font-extrabold text-blue -rotate-1 inline-block rounded-md bg-bluesoft px-2 py-1">
+                  Goes straight on the kitchen ticket
+                </div>
+              )}
+            </TicketSection>
+
+            {/* 04 · payment */}
+            <TicketSection no="04" title="Payment">
+              <PayCard
+                active={effectivePay === 'online'}
+                onClick={() => setPayMethod('online')}
+                icon={CreditCard}
+                title="Pay online"
+                sub="UPI, cards, netbanking via Razorpay"
+              />
+              {cashAllowed ? (
+                <PayCard
+                  active={effectivePay === 'cash'}
+                  onClick={() => setPayMethod('cash')}
+                  icon={Banknote}
+                  title="Cash"
+                  sub={orderType === 'dinein' ? 'Pay at the table' : 'Pay at the counter'}
+                />
+              ) : (
+                <div className="text-[11.5px] text-sub font-semibold px-1">Delivery orders are prepaid only.</div>
+              )}
+            </TicketSection>
+
+            {/* 05 · the damage — receipt lines */}
+            <TicketSection no="05" title="The damage">
+              <div className="space-y-1.5">
+                {cartLines.map((l) => (
+                  <div key={l.item.id} className="flex items-start justify-between gap-3 text-[13px] font-bold">
+                    <span className="min-w-0">
+                      {l.qty} × {l.item.name}
+                      {l.mods?.length > 0 && (
+                        <span className="block text-[11px] text-sub font-semibold">+ {l.mods.join(', ')}</span>
+                      )}
+                    </span>
+                    <span className="shrink-0">₹{l.lineTotal}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t-2 border-dashed border-line pt-2.5 space-y-1 text-[12.5px] font-bold">
+                <div className="flex justify-between text-sub">
+                  <span>Subtotal</span>
+                  <span>₹{subtotal}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-greendark">
+                    <span>Wicked savings{promo ? ` (${promo})` : ''}</span>
+                    <span>−₹{discount}</span>
+                  </div>
+                )}
+                {deliveryFee > 0 && (
+                  <div className="flex justify-between text-sub">
+                    <span>Delivery</span>
+                    <span>₹{deliveryFee}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-1.5">
+                  <span className="font-display uppercase text-[15px] tracking-[0.5px]">Total</span>
+                  <span className="font-display text-[22px] text-blue">₹{total}</span>
+                </div>
+              </div>
+            </TicketSection>
           </div>
-        </Section>
-      )}
-
-      {/* payment */}
-      <Section title="Payment">
-        <PayCard
-          active={effectivePay === 'online'}
-          onClick={() => setPayMethod('online')}
-          icon={CreditCard}
-          title="Pay online"
-          sub="UPI, cards, netbanking via Razorpay"
-        />
-        {cashAllowed ? (
-          <PayCard
-            active={effectivePay === 'cash'}
-            onClick={() => setPayMethod('cash')}
-            icon={Banknote}
-            title="Cash"
-            sub={orderType === 'dinein' ? 'Pay at the table' : 'Pay at the counter'}
-          />
-        ) : (
-          <div className="text-[11.5px] text-sub font-semibold px-1">Delivery orders are prepaid only.</div>
-        )}
-      </Section>
+        </div>
+        {/* torn receipt bottom edge */}
+        <div className="ticket-edge" />
+      </div>
 
       {/* CTA */}
       <div
@@ -294,12 +414,12 @@ export default function Checkout() {
         style={{ background: 'linear-gradient(to top, var(--bg) 55%, transparent)' }}
       >
         <button
-          className="w-full rounded-md text-white font-extrabold text-[15.5px] h-[52px] disabled:shadow-none"
-          style={{ background: problem ? '#CBA49D' : 'var(--blue)', boxShadow: problem ? 'none' : '0 8px 20px rgba(217,43,33,.3)' }}
+          className="w-full rounded-md text-white font-display uppercase tracking-[0.5px] text-[16px] h-[52px] disabled:shadow-none"
+          style={{ background: problem ? '#CBA49D' : 'var(--blue)', boxShadow: problem ? 'none' : '4px 4px 0 var(--shadowInk)' }}
           disabled={!!problem || placing}
           onClick={placeOrder}
         >
-          {placing ? 'Placing…' : effectivePay === 'online' ? `Pay ₹${total} & place order` : `Place order · ₹${total}`}
+          {placing ? 'Sending to the kitchen…' : effectivePay === 'online' ? `Pay ₹${total} · Fire the order` : `Fire the order · ₹${total}`}
         </button>
         {problem && <div className="text-[11.5px] text-sub font-semibold text-center mt-2">{problem}</div>}
       </div>
@@ -308,12 +428,17 @@ export default function Checkout() {
 }
 
 const inputCls =
-  'w-full bg-card border-2 border-line rounded-md px-3.5 h-11 text-[13.5px] font-semibold outline-none placeholder:text-sub';
+  'w-full bg-bg border-2 border-line rounded-md px-3.5 h-11 text-[13.5px] font-semibold outline-none placeholder:text-sub';
 
-function Section({ title, children }) {
+// numbered ticket block: "01 / WHO'S EATING ----------"
+function TicketSection({ no, title, children }) {
   return (
-    <section className="mb-4">
-      <h2 className="text-[12px] font-extrabold uppercase tracking-wide text-sub mb-2">{title}</h2>
+    <section>
+      <div className="flex items-center gap-2 mb-2.5">
+        <span className="font-display text-blue text-[13px]">{no}</span>
+        <h2 className="font-display uppercase text-[13px] tracking-[1px]">{title}</h2>
+        <span className="flex-1 border-t-2 border-dashed border-line" />
+      </div>
       <div className="space-y-2.5">{children}</div>
     </section>
   );

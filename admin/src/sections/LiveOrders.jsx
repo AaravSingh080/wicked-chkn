@@ -108,6 +108,9 @@ export default function LiveOrders() {
                 Notes: {o.lines.filter((l) => l.note).map((l) => `${l.name}: “${l.note}”`).join(' · ')}
               </div>
             )}
+            {o.kitchenNote && (
+              <div className="mt-1 text-[12px] font-extrabold text-red">Kitchen: “{o.kitchenNote}”</div>
+            )}
             <div className="mt-1 text-[12px] text-sub font-semibold">
               {o.customer.name} · {o.customer.phone}
               {o.address ? ` · ${o.address}` : ''}
@@ -312,7 +315,7 @@ function KotModal({ order, onClose, onPrint }) {
               {l.mods?.length > 0 && <div className="pl-2">&gt; {l.mods.join(', ')}</div>}
             </div>
           ))}
-          {order.lines.some((l) => l.note) && (
+          {(order.lines.some((l) => l.note) || order.kitchenNote) && (
             <>
               <div className="border-t border-dashed border-line my-2" />
               {order.lines
@@ -320,6 +323,7 @@ function KotModal({ order, onClose, onPrint }) {
                 .map((l) => (
                   <div key={l.id}>NOTE: {l.note}</div>
                 ))}
+              {order.kitchenNote && <div>KITCHEN: {order.kitchenNote}</div>}
             </>
           )}
           <div className="border-t border-dashed border-line my-2" />

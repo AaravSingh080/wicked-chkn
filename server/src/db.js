@@ -243,6 +243,7 @@ export async function migrate() {
   await addCol('orders', 'ready_at', (t) => t.bigint('ready_at'));
   await addCol('orders', 'cancel_reason', (t) => t.string('cancel_reason'));
   await addCol('order_lines', 'mods', (t) => t.text('mods'));
+  await addCol('orders', 'kitchen_note', (t) => t.string('kitchen_note')); // checkout "mod corner"
 
   // backfill modifiers for rows that predate the column
   const missing = await db('menu_items').whereNull('modifiers');

@@ -112,7 +112,9 @@ export function Tile({ item, size = 76, radius = 8, className = '', fullWidth = 
       className={`relative flex items-center justify-center shrink-0 select-none overflow-hidden ${className}`}
       style={{
         width: fullWidth ? '100%' : size,
-        height: size,
+        // photos are always 1:1 — full-width tiles size themselves square
+        height: fullWidth ? 'auto' : size,
+        aspectRatio: '1 / 1',
         borderRadius: radius,
         background: gradient,
         border: '2px solid var(--tileBorder)',

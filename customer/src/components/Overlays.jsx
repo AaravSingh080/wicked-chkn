@@ -49,10 +49,18 @@ export function Toast() {
 
 // Generic bottom sheet over scrim
 export function Sheet({ onClose, children, closeButton = true }) {
+  // freeze the page behind the sheet — scrolling the sheet must never scroll the screen under it
+  React.useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
   return (
     <div className="fixed inset-0 z-40 max-w-[420px] mx-auto">
-      <div className="absolute inset-0" style={{ background: 'rgba(10,20,36,.5)' }} onClick={onClose} />
-      <div className="sheet-up absolute bottom-0 inset-x-0 bg-card rounded-t-lg max-h-[92%] overflow-y-auto no-scrollbar">
+      <div className="absolute inset-0" style={{ background: 'rgba(28,6,4,.55)' }} onClick={onClose} />
+      <div className="sheet-up absolute bottom-0 inset-x-0 bg-card rounded-t-lg max-h-[92%] overflow-y-auto no-scrollbar overscroll-contain">
         {closeButton && (
           <button
             onClick={onClose}

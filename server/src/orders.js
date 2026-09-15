@@ -28,6 +28,7 @@ export async function serializeOrder(row, lines, rating) {
     kotPrinted: !!row.kot_printed,
     address: row.address || null,
     tableNo: row.table_no || null,
+    kitchenNote: row.kitchen_note || null,
     promoCode: row.promo_code || null,
     customer: { name: row.customer_name || '', phone: row.phone || '' },
     lines: ls.map((l) => ({

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, Check } from 'lucide-react';
 import { useStore } from '../store.jsx';
 import { Sheet } from '../components/Overlays.jsx';
 import { VegMark, Tile, SpicyPill, Stepper } from '../components/ui.jsx';
@@ -56,7 +56,7 @@ export default function ItemSheet() {
                       className="w-[17px] h-[17px] rounded-md border-2 flex items-center justify-center text-white text-[11px] font-extrabold shrink-0"
                       style={{ borderColor: on ? 'var(--blue)' : 'var(--line)', background: on ? 'var(--blue)' : 'transparent' }}
                     >
-                      {on ? '✓' : ''}
+                      {on && <Check size={12} strokeWidth={3.5} />}
                     </span>
                     <span className="flex-1 text-[13px] font-bold">{m.name}</span>
                     <span className="text-[12.5px] font-extrabold text-sub">{m.price ? `+₹${m.price}` : 'Free'}</span>

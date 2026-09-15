@@ -56,8 +56,8 @@ export default function Profile() {
           <div className="flex-1 min-w-0">
             {auth ? (
               <>
-                <div className="text-[16px] font-extrabold truncate">{auth.customer.name || 'Wicked fan'}</div>
-                <div className="text-[12px] font-semibold" style={{ color: '#E8B8B0' }}>+91 {auth.customer.phone}</div>
+                <div className="text-[16px] font-extrabold truncate">{auth?.customer?.name || 'Wicked fan'}</div>
+                <div className="text-[12px] font-semibold" style={{ color: '#E8B8B0' }}>+91 {auth?.customer?.phone || ''}</div>
               </>
             ) : (
               <>
@@ -117,9 +117,15 @@ export default function Profile() {
             <div className="relative font-display text-[24px] mt-0.5 uppercase">{taste.profile.name}</div>
             <div className="relative text-[12.5px] font-semibold opacity-90 mt-0.5">{taste.profile.line}</div>
             <div className="relative flex gap-4 mt-3 text-[11.5px] font-bold">
-              <span>{taste.stats.orders} orders</span>
-              {taste.stats.favourite && <span>Go-to: {taste.stats.favourite}</span>}
-              <span>Spice {'|'.repeat(Math.max(1, taste.stats.spiceLevel))}{'·'.repeat(5 - Math.max(1, taste.stats.spiceLevel))}</span>
+              <span>{taste?.stats?.orders ?? 0} orders</span>
+              {taste?.stats?.favourite && <span>Go-to: {taste.stats.favourite}</span>}
+              <span>
+                {(() => {
+                  // clamp hard — a bad spiceLevel must never crash the screen (negative .repeat throws)
+                  const lvl = Math.min(5, Math.max(1, Number(taste?.stats?.spiceLevel) || 1));
+                  return `Spice ${'|'.repeat(lvl)}${'·'.repeat(5 - lvl)}`;
+                })()}
+              </span>
             </div>
           </section>
         )}
@@ -210,8 +216,8 @@ export default function Profile() {
                     {o.num} · ₹{o.total}
                   </div>
                   <div className="text-[11px] text-sub font-semibold">
-                    {new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} ·{' '}
-                    {{ dinein: 'Dine-in', pickup: 'Pickup', delivery: 'Delivery' }[o.type]}
+                    {o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'} ·{' '}
+                    {{ dinein: 'Dine-in', pickup: 'Pickup', delivery: 'Delivery' }[o.type] || o.type}
                   </div>
                 </div>
                 <span

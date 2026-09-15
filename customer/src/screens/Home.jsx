@@ -314,7 +314,7 @@ export default function Home() {
             <div className="font-display text-[19px] uppercase text-blue leading-none">WICKED10</div>
             <div className="text-[11px] text-sub font-semibold mt-1">Orders ₹499+</div>
             <div className={`text-[11px] font-extrabold mt-auto pt-2 ${dealApplied ? 'text-blue' : 'text-sub'}`}>
-              {dealApplied ? 'APPLIED ✓ · tap to remove' : 'Tap coupon to apply'}
+              {dealApplied ? 'APPLIED · tap to remove' : 'Tap coupon to apply'}
             </div>
           </div>
           {dealApplied && (

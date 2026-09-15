@@ -316,6 +316,7 @@ r.post('/orders', async (req, res) => {
       payment_signature: paymentSignature,
       address: type === 'delivery' ? address : null,
       table_no: type === 'dinein' ? tableNo : null,
+      kitchen_note: String(b.kitchenNote || '').trim().slice(0, 200) || null,
       promo_code: priced.promoCode
     })
     .returning('id');

@@ -180,7 +180,7 @@ export default function LoginSheet() {
           <>
             <h2 className="font-display font-extrabold text-[20px]">Almost there</h2>
             <p className="text-[13px] text-sub font-semibold -mt-2">
-              {providerName} connected ✓ — add your number so we can text order updates.
+              {providerName} connected — add your number so we can text order updates.
             </p>
             <input className={inputCls} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
             <input
