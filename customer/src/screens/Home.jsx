@@ -142,8 +142,8 @@ export default function Home() {
           <div>
             <h1 className="font-display text-[20px] leading-none uppercase">Wicked Chkn</h1>
             <div className="flex items-center gap-1 mt-1 text-[11.5px] font-bold text-sub">
-              <MapPin size={12} className="text-blue" />
-              BRS Nagar · Open till 10 PM
+              <Clock size={12} className="text-blue" />
+              Open till 10 PM
               {config?.weather && ` · ${config.weather.temp}°`}
             </div>
           </div>
@@ -206,9 +206,6 @@ export default function Home() {
           className="absolute inset-0 pointer-events-none"
           style={{ background: 'repeating-linear-gradient(-45deg, rgba(74,14,11,.16) 0 14px, transparent 14px 28px)' }}
         />
-        <span className="food-float absolute pointer-events-none" style={{ right: -12, top: 14 }}>
-          <HeroBurger width={110} />
-        </span>
         <h2 className="relative font-display uppercase" style={{ fontSize: 30, lineHeight: 1.02, letterSpacing: '0.5px' }}>
           Wicked. <span style={{ color: 'transparent', WebkitTextStroke: '1.6px #FFF3EC' }}>Crispy.</span>
           <br />
@@ -626,24 +623,3 @@ function StoryViewer({ story, index, count, onNext, onClose }) {
   );
 }
 
-// layered illustrated burger for the hero (drawn, not emoji)
-function HeroBurger({ width = 140 }) {
-  return (
-    <svg width={width} viewBox="0 0 120 100" aria-hidden="true">
-      <ellipse cx="60" cy="94" rx="42" ry="6" fill="rgba(0,0,0,.3)" />
-      <rect x="22" y="77" width="76" height="13" rx="6.5" fill="#E89A4B" />
-      <rect x="20" y="62" width="80" height="13" rx="6.5" fill="#6E3A1E" />
-      <circle cx="38" cy="68" r="1.6" fill="rgba(0,0,0,.35)" />
-      <circle cx="60" cy="70" r="1.6" fill="rgba(0,0,0,.35)" />
-      <circle cx="82" cy="68" r="1.6" fill="rgba(0,0,0,.35)" />
-      <path d="M22 56h76v4l-8 12-8-10-8 12-8-10-8 12-8-10-8 12-8-10-8 8z" fill="#FFC93C" />
-      <rect x="24" y="52" width="72" height="7" rx="3.5" fill="#E4573D" />
-      <path d="M16 48h88v3q-5 6-11 0t-11 0t-11 0t-11 0t-11 0t-11 0t-11 0t-11 0z" fill="#7BC96F" />
-      <path d="M16 44a44 32 0 0 1 88 0v6H16z" fill="#F5A95B" />
-      <path d="M34 25a30 15 0 0 1 22-8" stroke="#FFD9A0" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.85" />
-      <ellipse cx="44" cy="30" rx="3" ry="2" fill="#FFE9C9" />
-      <ellipse cx="62" cy="24" rx="3" ry="2" fill="#FFE9C9" />
-      <ellipse cx="80" cy="31" rx="3" ry="2" fill="#FFE9C9" />
-    </svg>
-  );
-}

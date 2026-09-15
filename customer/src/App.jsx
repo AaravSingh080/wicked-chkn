@@ -119,9 +119,21 @@ function CartBar() {
 }
 
 export default function App() {
-  const { booted, screen } = useStore();
+  const { booted, screen, auth, setShowLogin } = useStore();
   const stretchRef = React.useRef(null);
   useOverscrollStretch(stretchRef, booted);
+
+  // sign in up front, not at checkout — once per app open, skippable, and the
+  // session persists in localStorage so a returning customer is never asked again
+  const promptedLogin = React.useRef(false);
+  React.useEffect(() => {
+    if (!booted || auth || promptedLogin.current) return;
+    promptedLogin.current = true;
+    const t = setTimeout(() => setShowLogin(true), 900);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [booted, auth]);
+
   if (!booted) return <Splash />;
   const Screen = SCREENS[screen] || Home;
 

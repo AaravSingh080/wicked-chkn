@@ -12,6 +12,14 @@ export default function Checkout() {
 
   const [name, setName] = useState(auth?.customer?.name || '');
   const [phone, setPhone] = useState(auth?.customer?.phone || '');
+  // identity comes from the signed-in account (people sign in at app start now);
+  // keep it synced if they sign in or switch accounts while on this screen
+  useEffect(() => {
+    if (auth?.customer) {
+      setName(auth.customer.name || '');
+      setPhone(auth.customer.phone || '');
+    }
+  }, [auth]);
   const [address, setAddress] = useState('');
   const [tableNo, setTableNo] = useState(() => {
     try {
@@ -84,12 +92,12 @@ export default function Checkout() {
   const problem = useMemo(() => {
     if (!config?.storeOpen) return "Ordering is paused right now — we're open 11 AM to 10 PM.";
     if (!cartLines.length) return 'Your cart is empty.';
-    if (name.trim().length < 2) return 'Add your name to continue.';
-    if (phone.replace(/\D/g, '').length !== 10) return 'Enter a 10-digit phone number.';
+    if (!auth) return 'Sign in to fire the order.';
+    if (name.trim().length < 2 || phone.replace(/\D/g, '').length !== 10) return 'Sign in to fire the order.';
     if (orderType === 'delivery' && address.trim().length < 6) return 'Add your delivery address.';
     if (orderType === 'dinein' && !tableNo.trim()) return 'Add your table number.';
     return null;
-  }, [config, cartLines, name, phone, orderType, address, tableNo]);
+  }, [config, cartLines, auth, name, phone, orderType, address, tableNo]);
 
   const items = cartLines.map((l) => ({ id: l.item.id, qty: l.qty, note: l.note || undefined, mods: l.mods }));
 
@@ -204,36 +212,33 @@ export default function Checkout() {
           </div>
 
           <div className="p-4 space-y-5">
-            {!auth && (
-              <button
-                className="w-full rounded-md bg-bluesoft border-2 border-blue/40 p-3 text-left text-[12.5px] font-extrabold text-blue"
-                onClick={() => setShowLogin(true)}
-              >
-                Sign in to prefill your details &amp; save this order →
-              </button>
-            )}
-
-            {/* 01 · contact */}
+            {/* 01 · who's eating — identity from the account, no typing */}
             <TicketSection no="01" title="Who's eating">
-              <input className={inputCls} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
-              <input
-                className={inputCls}
-                placeholder="10-digit phone"
-                inputMode="numeric"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/[^\d]/g, '').slice(0, 10))}
-              />
+              {auth ? (
+                <div className="flex items-center gap-3 rounded-md bg-soft border-2 border-line px-3.5 py-3">
+                  <span className="w-9 h-9 rounded-md -rotate-3 bg-blue text-white font-display text-[15px] flex items-center justify-center shrink-0">
+                    {(auth.customer?.name || 'W')[0].toUpperCase()}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13.5px] font-extrabold truncate">{auth.customer?.name || 'Wicked fan'}</div>
+                    <div className="text-[11.5px] text-sub font-bold">+91 {auth.customer?.phone}</div>
+                  </div>
+                  <button className="text-blue text-[11.5px] font-extrabold shrink-0" onClick={() => setShowLogin(true)}>
+                    Switch
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="w-full rounded-md bg-blue text-white font-extrabold text-[14px] py-3.5 shadow-cta"
+                  onClick={() => setShowLogin(true)}
+                >
+                  Sign in to continue
+                </button>
+              )}
             </TicketSection>
 
             {orderType === 'delivery' && (
               <TicketSection no="02" title="Where to">
-          <div className="rounded-lg bg-soft p-4 text-center" style={{ border: '2px dashed var(--line)' }}>
-            <MapPin size={22} className="text-blue mx-auto" />
-            <div className="text-[12.5px] font-bold mt-1.5">Pin dropped · 2.1 km from Wicked Chkn</div>
-            <div className="text-[11.5px] font-bold text-greendark mt-0.5 flex items-center justify-center gap-1">
-              <Check size={12} strokeWidth={3.5} /> Within the 7 km delivery zone
-            </div>
-          </div>
           {savedAddresses.length > 0 && (
             <div className="flex gap-2 flex-wrap">
               {savedAddresses.map((a) => (
