@@ -479,10 +479,15 @@ export default function Home() {
           {featured.slice(0, 6).map((item, i) => {
             const qty = cart[item.id]?.qty || 0;
             return (
-              <button
+              // div+role, not <button> — the qty stepper inside renders real buttons,
+              // and button-in-button is invalid DOM that browsers reparent unpredictably
+              <div
                 key={item.id}
-                className={`press-tilt bg-card border-2 border-line rounded-lg p-3 text-left ${i % 2 ? '-rotate-[0.8deg]' : 'rotate-[0.8deg]'}`}
+                role="button"
+                tabIndex={0}
+                className={`press-tilt bg-card border-2 border-line rounded-lg p-3 text-left cursor-pointer ${i % 2 ? '-rotate-[0.8deg]' : 'rotate-[0.8deg]'}`}
                 onClick={() => setSheetItem(item)}
+                onKeyDown={(e) => e.key === 'Enter' && setSheetItem(item)}
               >
                 <div className="relative">
                   <Tile item={item} size={96} radius={8} fullWidth />
@@ -505,7 +510,7 @@ export default function Home() {
                   )}
                 </div>
                 <div className="text-[13px] font-bold mt-4 truncate">{item.name}</div>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -577,20 +582,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* mini cart bar — same behaviour as the menu screen */}
-      {cartCount > 0 && (
-        <button
-          className="sheet-up fixed bottom-[84px] inset-x-0 max-w-[420px] mx-auto z-20 flex items-center gap-3 rounded-lg text-white p-3.5 shadow-lg"
-          style={{ background: 'var(--blue)', width: 'calc(100% - 40px)', left: 0, right: 0, marginLeft: 'auto', marginRight: 'auto', maxWidth: 380, border: '2px solid var(--tileBorder)' }}
-          onClick={() => setScreen('cart')}
-        >
-          <ShoppingCart size={18} />
-          <span className="flex-1 text-left text-[13.5px] font-bold">
-            {cartCount} item{cartCount > 1 ? 's' : ''} · ₹{total}
-          </span>
-          <span className="text-[13.5px] font-extrabold">View cart →</span>
-        </button>
-      )}
+      {/* the global CartBar (App.jsx) handles "view cart" on every screen */}
     </div>
   );
 }

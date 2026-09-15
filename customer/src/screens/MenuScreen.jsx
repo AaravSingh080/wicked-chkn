@@ -164,22 +164,7 @@ export default function MenuScreen() {
         ))}
       </div>
 
-      {/* mini cart bar */}
-      {cartCount > 0 && (
-        <button
-          className="sheet-up fixed bottom-[76px] inset-x-0 max-w-[420px] mx-auto z-20 flex items-center gap-3 rounded-lg text-white p-3.5 shadow-lg"
-          style={{ background: 'var(--hero)', width: 'calc(100% - 40px)', left: 0, right: 0, marginLeft: 'auto', marginRight: 'auto', maxWidth: 380 }}
-          onClick={() => setScreen('cart')}
-        >
-          <ShoppingCart size={18} style={{ color: '#FF8A7A' }} />
-          <span className="flex-1 text-left text-[13.5px] font-bold">
-            {cartCount} item{cartCount > 1 ? 's' : ''} · ₹{total}
-          </span>
-          <span className="text-[13.5px] font-extrabold" style={{ color: '#FF8A7A' }}>
-            View cart →
-          </span>
-        </button>
-      )}
+      {/* the global CartBar (App.jsx) handles "view cart" on every screen */}
 
       {/* filters sheet */}
       {showFilters && (

@@ -163,7 +163,7 @@ export default function Checkout() {
   };
 
   return (
-    <div className="pb-44">
+    <div className="pb-44" data-no-stretch>
       {/* maroon masthead */}
       <div className="relative overflow-hidden text-white px-5 pt-5 pb-12" style={{ background: 'var(--hero)' }}>
         <span

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ShoppingCart } from 'lucide-react';
 import { useStore } from './store.jsx';
 import Splash from './screens/Splash.jsx';
 import Home from './screens/Home.jsx';
@@ -38,6 +39,9 @@ function useOverscrollStretch(ref, enabled) {
     const doc = () => document.scrollingElement || document.documentElement;
     const atTop = () => doc().scrollTop <= 0;
     const atBottom = () => doc().scrollTop + window.innerHeight >= doc().scrollHeight - 1;
+    // screens with fixed controls inside the wrapper (checkout CTA) opt out —
+    // a transformed ancestor would briefly re-anchor them mid-pull
+    const blocked = () => !!document.querySelector('[data-no-stretch]');
 
     const apply = () => {
       const n = el();
@@ -54,6 +58,7 @@ function useOverscrollStretch(ref, enabled) {
     };
 
     const onWheel = (e) => {
+      if (blocked()) return;
       const top = atTop() && e.deltaY < 0;
       const bottom = atBottom() && e.deltaY > 0;
       if (!top && !bottom) return;
@@ -67,7 +72,7 @@ function useOverscrollStretch(ref, enabled) {
       touchY = e.touches[0].clientY;
     };
     const onTouchMove = (e) => {
-      if (touchY == null) return;
+      if (touchY == null || blocked()) return;
       const dy = e.touches[0].clientY - touchY;
       if ((atTop() && dy > 0) || (atBottom() && dy < 0)) {
         pull = Math.max(-70, Math.min(70, dy * 0.32));
@@ -93,6 +98,26 @@ function useOverscrollStretch(ref, enabled) {
   }, [ref, enabled]);
 }
 
+// global "View cart" bar — lives OUTSIDE the stretch wrapper so position:fixed
+// always means the viewport, and follows the customer to every tab
+function CartBar() {
+  const { cartCount, total, screen, setScreen } = useStore();
+  if (!cartCount || ['cart', 'checkout', 'tracking'].includes(screen)) return null;
+  return (
+    <button
+      className="sheet-up fixed bottom-[84px] inset-x-5 max-w-[380px] mx-auto z-20 flex items-center gap-3 rounded-lg text-white p-3.5"
+      style={{ background: 'var(--blue)', border: '2px solid var(--tileBorder)', boxShadow: '4px 4px 0 var(--shadowInk)' }}
+      onClick={() => setScreen('cart')}
+    >
+      <ShoppingCart size={18} />
+      <span className="flex-1 text-left text-[13.5px] font-bold">
+        {cartCount} item{cartCount > 1 ? 's' : ''} · ₹{total}
+      </span>
+      <span className="text-[13.5px] font-extrabold">View cart →</span>
+    </button>
+  );
+}
+
 export default function App() {
   const { booted, screen } = useStore();
   const stretchRef = React.useRef(null);
@@ -106,6 +131,7 @@ export default function App() {
       <div key={screen} ref={stretchRef} className="screen-in stretch-wrap">
         <Screen />
       </div>
+      <CartBar />
       <TabBar />
       <ItemSheet />
       <LoginSheet />

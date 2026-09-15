@@ -52,8 +52,15 @@ export default function Chat() {
 
   const messages = activeChat?.messages || [];
 
-  const scrollDown = () => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  useEffect(scrollDown, [messages.length, busy]);
+  const scrollDown = () => {
+    // braces matter: newer Chromium returns a Promise from smooth scrollTo, and a
+    // Promise handed back to useEffect as "cleanup" crashes React on unmount
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+  };
+  useEffect(() => {
+    scrollDown();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, busy]);
 
   const send = async (text) => {
     const t = (text || '').trim();
