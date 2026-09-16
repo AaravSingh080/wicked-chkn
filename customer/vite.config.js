@@ -7,7 +7,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // registration lives in main.jsx so the page can reload itself onto a new deploy
+      injectRegister: false,
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         // never let the customer PWA's service worker hijack the admin or API
         navigateFallbackDenylist: [/^\/admin/, /^\/api/],
